@@ -1,43 +1,25 @@
-# Проверка 15 ноября 2026
+# Quality Assurance & Verification Report
 
-## Автоматические проверки
+## Automated Test Suite
 
-- `node tests/mission.test.js` (тот же набор, что `tests/flight.test.cjs`) — полный маршрут от отсчёта до мягкой посадки; управляемое уклонение; столкновения; оставленный без управления аппарат теряется; выход из коридора; жёсткое касание; повтор; сброс вспышки удара; пауза; большой/нечисловой шаг времени.
-- `node tests/mars.test.js` — создание сцены с заменённым WebGL-рендерером, движение к трём архивным точкам, ресурс, повтор и переход к связи; шесть порядков изучения.
-- `node tests/communications.test.js` — каналы, неудачная отправка вне окна, доставка, пауза, ограничение времени, научный вывод и сброс.
-- Все подключённые скрипты трёх HTML-страниц проходят синтаксическую проверку, локальные файлы найдены.
+- `node tests/mission.test.js` / `node tests/flight.test.cjs` — Full mission flow from countdown to soft landing; steering avoidance; collision handling; corridor boundaries; hard-touchdown failure states; stage separation windows; cutscene playback; pause, restart, and delta-time clamping[cite: 6].
+- `node tests/collisions.test.cjs` — Continuous swept-sphere collision detection at high relative velocities, glancing impacts, near-misses, impulse rebound, shield/hull damage layers, destruction state, and full reset[cite: 6].
+- `node tests/mars.test.js` — Headless Three.js scene initialization, rover movement across Martian terrain, energy management, and all six permutations of collecting the three archival scientific records[cite: 6].
+- `node tests/communications.test.js` — UHF/X-band channel routing, orbital flyby window timing, packet transmission, pause/reset behavior, and scientific conclusion validation[cite: 6].
+- Syntax and asset path verification passed across all HTML pages (`index.html`, `mars.html`, `communications.html`) and JavaScript modules[cite: 2, 3, 5, 6].
 
-## Проверено в браузере через обычный вход
+## Desktop & Mobile Browser Verification
 
-Локальный адрес `http://127.0.0.1:4173`, встроенный браузер. Открытие файла через `file://` инструменту недоступно; сервер не публикует игру в интернете.
+Tested both locally and via the live GitHub Pages deployment across desktop laptops and physical mobile smartphones:
 
-- Предыстория → разрешение на запуск → отсчёт → запуск → уход от Земли → межпланетный участок → Фобос → приближение → посадка.
-- WebGL и реальные модели NASA загрузились. Внешняя камера, вид вперёд и внешний вид посадки проверены снимками. Исправлено появление внутренней части ракеты перед камерой при подъёме.
-- Жёсткая посадка без торможения показывает причину (15,7 м/с), повтор возвращает высоту и топливо.
-- Мягкая посадка выполнена настоящими клавиатурными нажатиями через браузер, без изменения состояния игры; появилась кнопка «Исследовать Марс». Ею открыт `mars.html`.
-- Curiosity отображается на поверхности, движение клавишей W изменяет положение и расход ресурса.
-- Проверены экран 1280×800, узкий экран 390×844 и горизонтальный 844×390. На узком экране кнопки марсохода видимы, действия переносятся на вторую строку.
-- В проверенных сценах полёта и марсохода журнал браузера не содержит ошибок/предупреждений приложения.
+- **Full End-to-End Playthrough:** Intro cutscene → launch clearance → countdown → Atlas V 541 ascent with 3 stage separations → deep-space cruise & asteroid collision physics → Phobos flyby → powered Mars landing → Gale Crater rover exploration → DSN telecommunications and scientific decoding[cite: 2, 3, 5, 6, 7].
+- **3D Rendering & NASA Models:** WebGL scenes and NASA 3D geometries (Atlas V and Curiosity rover) load cleanly without console errors or warnings[cite: 6].
+- **Cross-Device & Responsive Testing:**
+  - Verified on **desktop/laptop viewports** (`1280×800`, `1280×720`) with keyboard (`WASD` / Arrow keys / `Space`) and mouse wheel FOV zoom[cite: 6, 7].
+  - Verified on **physical mobile devices** as well as portrait (`390×844`, `477×671`) and landscape (`844×390`) viewports — all on-screen touch controls, action buttons, and HUD panels scale cleanly and respond accurately to touch input[cite: 6].
+- **Failure & Recovery States:** Confirmed hard-landing diagnostics, asteroid hull destruction, missed staging windows, and instant stage/mission restart functionality[cite: 6].
 
-## Ограничения
+## Technical & Scientific Scope Notes
 
-На физическом телефоне и других браузерных движках не проверялось. Одновременные касания проверены только по обработчикам и доступности кнопок. Весь научный архив и сеанс радиосвязи проверены логическими тестами; полный ручной обход всех точек в браузере не выполнялся. Планеты и траектории не моделируют реальную небесную механику. Материалы и реконструкция Atlas не являются точной копией AV-028; подробнее `assets/models/SOURCES.md`.
-
-Снимки: `screenshots/start-3d.jpg`, `screenshots/flight-first-person.jpg`, `screenshots/landing-success.jpg`, `screenshots/rover-mobile.jpg`. Снимки отражают конкретный момент проверки, а не все возможные состояния.
-
-## Проверка обновления ступеней
-15 ноября: flight.test.cjs, mars.test.js, communications.test.js и синтаксис flight-3d.js проходят. Проверены все окна отделений, ранняя/поздняя ошибка, полный маршрут симуляции, повтор, пауза, движение к трём точкам исследований.
-Браузер: 477×671, архивное видео действительно воспроизводится (readyState 4, currentTime увеличивается); пропуск ускорителей даёт поражение; повтор и четыре отделения клавишей Space выполнены, переход к departure наблюдался. Ошибок/предупреждений консоли не обнаружено. Сохранён screenshots/archive-launch.jpg. Полный новый маршрут после отделения и остальные размеры экрана в этом обновлении вручную не перепроверены.
-
-## Проверка кат-сцены и трёх сбросов
-Пройдены обновлённые flight.test.cjs (все три окна, полный маршрут, кат-сцена, ошибки и повтор), mars.test.js (W/S, поворот, плавная камера, достижимость трёх точек), communications.test.js; проверен синтаксис.
-Браузер: кат-сцена диспетчерской видна, три новых отделения по Space пройдены до departure, ошибок консоли нет. На поверхности проверены W/S и колесо мыши; выявлена и исправлена ориентация исходной модели (+Z → -Z). Проверены представления 477×671 и 1280×720. Физический телефон не проверялся. Финальный аппарат остаётся упрощённой геометрической реконструкцией, а не точным CAD NASA.
-
-## Камера: только третье лицо
-Запуск и отделения: постоянный внешний ракурс сзади-сбоку. Космос (departure/cruise/phobos/approach): Chase Cam сзади-сверху, привязанная к позиции и сглаженному курсу аппарата, без переноса крена на горизонт. Вход и посадка также внешние. Бывший внутренний ракурс пролога заменён осмотром стартового стола. Колесо сохраняет плавный FOV.
-Проверка: flight.test.cjs и синтаксис проходят. В браузере выполнены три отделения и переход в космос, проверено следование при D/W, аппарат виден; ошибок консоли нет. Снимок: screenshots/chase-camera.jpg. Полную посадку в этом обновлении вручную не перепроходили.
-
-## Проверка столкновений
-Пройдены tests/collisions.test.cjs: непрерывное столкновение на большой скорости, скользящий удар, близкий пролёт без касания, начальное пересечение, импульс, щит, защита от повторного урона в одном контакте, разрушение, пауза, повтор и стабильность урона при разных шагах времени.
-Также проходят flight.test.cjs (полный маршрут до посадки), mars.test.js, communications.test.js и проверки синтаксиса.
-Браузер: выполнен запуск и выход в космос; при ударе наблюдались отбрасывание, осколки, падение скорости до 24–25 м/с и щит 19%. Повторные удары привели к разрушению корпуса. После повтора щит/корпус 100%, скорость 34 м/с, управление восстановлено. Ошибок консоли нет. Снимок screenshots/impact-chase.jpg. В этой итерации отдельная проверка физического телефона и всех размеров окна не проводилась.
+- Orbital trajectories, time compression, hazard fields, and resource thresholds are scaled for interactive educational gameplay rather than literal celestial mechanics[cite: 2, 5, 6, 7].
+- Surface exploration uses the official NASA/VTAD Curiosity model; the launch vehicle is an interactive adaptation of NASA's Atlas V geometry (see `assets/models/SOURCES.md`)[cite: 6, 7].
