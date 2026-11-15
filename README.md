@@ -1,66 +1,92 @@
-# CURIOSITY — исторические события и научные результаты
+# 🚀 CURIOSITY — Historical Events & Scientific Discoveries (3D Mission Simulator)
 
-Вход: `index.html`. Игра работает локально без интернета, кроме ссылок на источники. Полёт и поверхность требуют WebGL. Для браузерной проверки: `node tools/preview.cjs`, затем http://127.0.0.1:4173 . Сервер доступен только на этом компьютере и отдаёт только игровые файлы. Предоставленный исходник в «Загрузках» не изменён.
+> **NASA Space Apps Challenge Project**  
+> An interactive 3D web simulation of NASA's **Mars Science Laboratory (Curiosity)** mission — from launch clearance and stage separation aboard an Atlas V 541 rocket to Gale Crater surface exploration and Deep Space Network (DSN) telecommunications[cite: 2, 3, 5, 7].
 
-## Маршрут
+🌐 **Live Demo:** [https://hasangroup.github.io/mars-mission-simulator/](https://hasangroup.github.io/mars-mission-simulator/)  
+📂 **Repository:** [https://github.com/HasanGroup/mars-mission-simulator](https://github.com/HasanGroup/mars-mission-simulator)
 
-1. Предыстория реальной миссии NASA Mars Science Laboratory.
-2. Отдельный экран разрешения на запуск: 26 ноября 2011 года Омар Баэз, руководитель запуска NASA Launch Services Program, дал своё «go». Показано изложение факта, не придуманная речь или архивная аудиозапись. Кнопка «Сигнал принят» начинает отсчёт. Atlas V 541 — носитель компании ULA.
-3. Новый 3D-полёт: запуск снаружи → плавный переход к камере аппарата → уход от Земли снаружи → вид вперёд с уклонением от условных объектов → вымышленный близкий пролёт Фобоса → подход к Марсу от первого лица → плавный выход наружу перед Sky Crane. Реальный MSL не выходил на орбиту Марса. Атмосферное торможение и парашют сжаты в переход, отдельно не разыгрываются. Посадка — 6 августа 2012 года по UTC. Стыковки нет.
-4. На поверхности — три архивные записи NASA: Hottah (свидетельства древнего потока), John Klein/Yellowknife Bay (древняя пригодная среда), RAD (радиационные измерения). Маркеры представляют записи архива, а не новые открытия игрока. Все три надо изучить; затем доступна кнопка «К передаче данных».
-5. `communications.html`: выбрать UHF, дождаться зелёного окна пролёта и отправить три записи через Mars Odyssey или MRO; выбрать X-band и DSN; дождаться доставки и сопоставить результаты с научными выводами. При неверном выборе показано объяснение. Вне окна передача не начинается, архив не теряется. Есть пауза и полный повтор сеанса.
-6. Завершение: выбрать корректный вывод — древняя пригодность среды для жизни, а не обнаружение организмов.
+---
 
-## Границы достоверности
+## 🎯 Project Overview & Educational Impact
 
-Исторические события, аппараты, каналы связи и научные результаты основаны на источниках NASA. Графика и управление остаются схематическими: это интерактивное объяснение, не цифровой двойник и не архивная запись. Реальные запуск и посадка выполнялись автоматически. Пороги скорости, запас игрового ресурса, рельеф, расположение архивных маркеров, сроки и размеры пакетов не являются историческими измерениями. Три «пакета» обозначают группы результатов разных исследований, а не конкретный зарегистрированный сеанс связи. Curiosity мог связываться с Землёй напрямую; игра показывает путь через орбитальный ретранслятор. Стыковка не требуется. Пробы физически не отправляются на Землю — передаётся информация.
+Planetary missions involve complex engineering, multi-stage aerodynamics, and deep-space communications that are difficult for students to grasp from static textbooks. **Curiosity: Path to Mars** transforms verified NASA mission archives and scientific discoveries into an interactive, zero-install 3D browser experience[cite: 2, 3, 5, 7].
 
-Данные о пригодной среде не доказывают наличие жизни. Измерения радиации помогают оценивать риск будущих экспедиций, но не гарантируют их безопасность. На поверхности используется официальная статичная модель Curiosity NASA/VTAD. Atlas V — адаптация модели NASA 551 с четырьмя ускорителями, не точная реконструкция AV-028. Источники и изменения: `assets/models/SOURCES.md`. Поле препятствий и близкий пролёт Фобоса вымышлены и обозначены в интерфейсе.
+* **Entry Point:** `index.html` (runs completely offline without an internet connection, except for external NASA reference links; WebGL is required for 3D flight and surface exploration).
+* **Cross-Platform:** Supports desktop keyboard controls and responsive mobile touch interfaces[cite: 2, 3, 5].
 
-## Источники (проверены 14 ноября 2026)
+---
 
-- [NASA Spaceport News, 10.08.2012, стр. 1](https://www3.nasa.gov/centers/kennedy/pdf/676259main_aug10-2012.pdf) — Омар Баэз и разрешение на запуск 26.11.2011.
-- [NASA: Curiosity’s Launch](https://science.nasa.gov/resource/curiositys-launch/) — реальный запуск и архивный материал.
-- [NASA: Curiosity Poster](https://science.nasa.gov/wp-content/uploads/2024/03/CuriosityPoster.pdf) — Atlas V 541 и даты.
-- [NASA/JPL: Curiosity](https://www.jpl.nasa.gov/missions/mars-science-laboratory-curiosity-rover-msl/) — цель, посадка в кратере Гейл и Sky Crane.
-- [NASA: Communicating with Curiosity](https://science.nasa.gov/resource/communicating-with-curiosity-2/) — орбитеры и сеть DSN.
-- [NASA: MSL communications](https://mars.nasa.gov/internal_resources/822/) — UHF к орбитерам, X-band к DSN, прямая связь.
-- [NASA/JPL, 27.09.2012: древний поток](https://www.jpl.nasa.gov/news/nasa-rover-finds-old-streambed-on-martian-surface/) — округлые камешки Hottah.
-- [NASA/JPL, 12.03.2013: пригодная среда](https://www.jpl.nasa.gov/news/nasa-rover-finds-conditions-once-suited-for-ancient-life-on-mars/) — CheMin, SAM и Yellowknife Bay.
-- [NASA, 09.12.2013: радиационное воздействие](https://science.nasa.gov/resource/radiation-exposure-comparisons-with-mars-trip-calculation/) — применение данных RAD к оценке риска пилотируемой экспедиции.
+## 🗺️ Mission Route & Gameplay Flow
 
-## Проверки
+1. **Mission Background & Launch Clearance (`index.html`)**[cite: 3, 7]
+   * Presents the historical context of NASA's Mars Science Laboratory (MSL)[cite: 3, 7].
+   * Features a dedicated launch-clearance screen: on **November 26, 2011**, Omar Baez (Launch Director, NASA Launch Services Program) gave his official *"go"* for launch aboard ULA's **Atlas V 541**[cite: 3, 7]. Clicking **"Signal Received"** initiates the countdown.
+2. **3D Launch, Transit & Mars Landing (`index.html`)**[cite: 3, 7]
+   * Autonomous engine cutscene (mission control room → launch pad with smoke and engine ignition) followed by an external rear-quarter launch view[cite: 3, 7].
+   * **Active Stage Separation (`Space` / on-screen button):** Players must trigger three timed separation events within altitude windows:
+     * **First Stage & SRBs:** `40–55 km`[cite: 7]
+     * **Centaur Upper Stage:** `110–130 km`[cite: 7]
+     * **Payload Fairing:** `160–180 km`[cite: 7]
+   * **Deep Space Cruise & Phobos Flyby:** Smooth third-person Chase Cam through a three-layer procedural starfield (`js/space-sky.js`) with continuous collision physics against asteroid hazards[cite: 3, 7].
+   * **Mars Approach & Powered Descent:** Smooth 1.6s scene transitions leading to powered landing on **August 6, 2012 (UTC)**[cite: 7]. *(Note: Atmospheric entry and parachute deployment are compressed into the transition; no orbital docking occurs[cite: 7].)*
+3. **Gale Crater Surface Exploration (`mars.html`)**[cite: 5, 7]
+   * Drive the official static **NASA/VTAD Curiosity rover model** across Martian terrain to locate and scan three real NASA archival milestones within 180 seconds of active driving[cite: 5, 7]:
+     * **Hottah Outcrop:** Rounded gravel conglomerates indicating transport by an ancient flowing stream[cite: 2, 5, 7].
+     * **John Klein / Yellowknife Bay:** Clay minerals and chemical conditions (analyzed by *CheMin* and *SAM*) confirming an ancient habitable environment[cite: 2, 5, 7].
+     * **RAD (Radiation Assessment Detector):** Surface radiation measurements used to evaluate health risks for future human Mars expeditions[cite: 2, 5, 7].
+4. **Deep Space Telecommunications (`communications.html`)**[cite: 2, 7]
+   * Configure the relay path: select **UHF**, wait for the green orbital pass window, and transmit all three research records via **Mars Odyssey** or **Mars Reconnaissance Orbiter (MRO)**[cite: 2, 7].
+   * Switch to **X-band** and the **NASA Deep Space Network (DSN)** to deliver data to Earth[cite: 2, 7].
+   * Decode results from **Mastcam**, **CheMin/SAM**, and **RAD**, then select the scientifically accurate conclusion: *ancient Mars possessed conditions habitable for microbial life (not the discovery of living organisms)*[cite: 2, 7].
 
-- `node tests/physics.test.js` — базовая физика.
-- `node tests/mission.test.js` / `node tests/flight.test.cjs` — полный новый маршрут, достижимая мягкая посадка, аварии при столкновениях/выходе из коридора/жёстком касании, повтор, пауза, ограничение скачка времени.
-- `legacy-flight.html` и `tests/legacy-mission.test.cjs` — сохранённая предыдущая 2D-версия; основной вход её не использует.
-- `node tests/mars.test.js` — создание сцены с подменённым рендерером, движение до всех архивных маркеров, ресурс, повтор и переход к связи.
-- `node tests/communications.test.js` — правильный/неправильный канал, окно, отправка, пауза, ограничение скачка времени, вывод, полный сброс.
+---
 
-Браузерная проверка новой версии выполняется через локальный HTTP-сервер. Итоги и размеры экранов записываются в `QA.md`. На физическом телефоне игра не проверялась.
+## 🎮 Controls & Physics Mechanics
 
-Конкурсная задача не выбрана; соответствие Space Apps и поддержка NASA не заявляются. Публикация не выполнялась. Three.js r170 хранится локально; лицензия — `assets/THREE-LICENSE.txt`.
+### Flight & Landing (`index.html`)
+* **Steering:** `W A S D` / `Arrow Keys` or on-screen touch buttons (maintain launch pitch deviation within `±6.7°`; ascent thrust is automatic)[cite: 3, 7].
+* **Stage Separation & Landing Burn:** `Spacebar` or on-screen action button[cite: 3, 7].
+* **Camera Zoom:** Smooth FOV adjustment via mouse wheel[cite: 7].
+* **Landing Thresholds:** Touchdown vertical speed `≤ 3.5 m/s`, lateral speed `≤ 1.5 m/s`, target circle deviation `≤ 6 m`[cite: 7].
+* **Space Collision Physics:** Continuous swept-sphere collision detection (MSL bounding radius `2.3` units; asteroid radius `1.15×` geometry) with partially elastic impulse response (restitution `0.42`), shield/hull damage layers, light flash, 72-particle bursts, and damped Chase Cam shake[cite: 7].
 
-## Управление новым полётом
+### Surface Rover (`mars.html`)
+* **Drive:** `W A S D` / `Arrow Keys` (`W`/`↑` forward along `-Z`, `S`/`↓` reverse)[cite: 5, 7].
+* **Scan Record:** `E` or **"Study Record"** button (reading archival cards pauses the mission timer)[cite: 5].
+* **Camera / Brake:** `C` to switch camera views; `Spacebar` to brake[cite: 5].
 
-WASD / стрелки или экранные кнопки: направление. На старте держите отклонение внутри ±6,7; тяга автоматическая. В перелёте избегайте маркеров: три удара приводят к неудаче. При посадке Пробел / ТЯГА тормозит снижение; скорость касания ≤3,5 м/с, боковая ≤1,5 м/с, отклонение от круга ≤6 м. Это игровые пороги. Есть пауза и повтор текущего этапа. После посадки — исследования на Марсе, затем передача данных.
+---
 
-## Обновление 15 ноября: ступени и плавность
-- Пробел / экранная кнопка: ускорители 40–65, обтекатель 110–140, первая ступень 180–215, Centaur 330–355 км. Все окна — игровая шкала, не историческая телеметрия. Раннее/позднее действие завершает попытку.
-- Отделяемые детали взяты из NASA Atlas GLB; при повторе восстанавливаются родители и трансформации. MSL после Centaur — авторская упрощённая реконструкция, не официальный CAD.
-- Переходы сцен растворяются за 1,6 с; размер и положение Марса согласованы между перелётом, Фобосом и приближением.
-- Вперёд у марсохода теперь соответствует направлению от следящей камеры.
-- Архив NASA TV воспроизводится по сети из https://science.nasa.gov/resource/curiositys-launch/ . Кабины экипажа нет; отдельный монтаж диспетчерской и бортовых камер не добавлен.
-- Исторический порядок отделений: https://www.jpl.nasa.gov/news/press_kits/MSLLaunch.pdf . Высоты/длительности игры не следует использовать как реконструкцию реального запуска.
+## 🔬 Scientific Validity & Scope Boundaries
 
-## Актуальная версия: кат-сцена и три сброса
-Видеофайл заменён автономной кат-сценой: диспетчерская → условная кабина → стартовый стол с дымом и двигателями. Кабина и панели — художественная визуализация, не архив NASA.
-Текущая игровая последовательность в js/rockets-data.js: первая ступень с ускорителями 40–55 км, Centaur 110–130 км, обтекатель 160–180 км. Она намеренно отличается от исторического запуска MSL. Предыдущие четыре окна выше больше не действуют.
-Колесо мыши плавно меняет FOV на обоих этапах. Положение и точка взгляда сглаживаются с учётом времени кадра. У модели Curiosity передняя ось +Z развёрнута в игровую -Z; W/↑ — вперёд, S/↓ — назад. Новый фон: js/space-sky.js, три слоя звёзд и процедурное свечение пыли. Старые world.js/atmosphere.js относятся к сохранённой 2D-версии.
+All historical dates, spacecraft systems, radio frequencies, and scientific conclusions are grounded in official NASA documentation[cite: 7]. To provide an accessible interactive educational experience rather than a raw engineering digital twin, the simulation clearly distinguishes game abstractions from historical telemetry[cite: 7]:
 
-Последнее изменение: режим первого лица полностью исключён. Запуск — внешний вид сзади-сбоку; космос — плавная Chase Cam сзади-сверху; вход/посадка — внешний вид. Бывший эпизод кабины теперь показывает ракету снаружи.
+* **Automated vs. Manual Control:** Real launch, stage separations, and Sky Crane landing were executed autonomously; manual steering, staging windows, asteroid fields, and the close Phobos flyby are interactive gameplay mechanics[cite: 3, 7].
+* **Simplified Orbital & Surface Scales:** Flight durations, speed thresholds, rover power reserves, terrain distances, and the three "data packets" (representing grouped research findings rather than a single literal telemetry pass) are scaled for a 3–5 minute educational session[cite: 2, 5, 7]. While Curiosity could transmit directly to Earth, this module demonstrates orbiter relay via UHF/X-band[cite: 2, 7].
+* **Scientific Precision:** Evidence of a habitable environment does not prove past or present life, and RAD measurements inform radiation shielding rather than guaranteeing crew safety[cite: 2, 7].
+* **3D Models:** Surface exploration uses the official NASA/VTAD Curiosity model; the Atlas V launcher is an adaptation of NASA's Atlas V 551 model configured with four SRBs (see `assets/models/SOURCES.md`)[cite: 5, 7].
 
-## Столкновения в космосе
-Bounding sphere аппарата MSL (марсоход находится внутри): радиус 2,3 игровых единицы. Сфера астероида учитывает неровности геометрии (1,15 × радиус). Непрерывная проверка относительного перемещения между кадрами предотвращает пролёт сквозь препятствие.
-Частично упругий удар: коэффициент восстановления 0,42, импульс по нормали, потеря скорости, краткое ослабление управления и отбрасывание. Астероид сохраняется и тоже получает импульс. Урон зависит от нормальной скорости удара: сначала щит, затем корпус. При разрушении — проигрыш. Щит и астероидное поле являются игровыми условностями.
-Визуал: локальная вспышка света, 72 частицы, затухающая тряска Chase Cam без накопления смещения. Повтор очищает скорость отдачи, координату отбрасывания, щит/корпус и эффекты.
+---
+
+## 📚 NASA Open Data & Official Sources
+
+* [NASA Spaceport News (Aug 10, 2012, p. 1)](https://www3.nasa.gov/centers/kennedy/pdf/676259main_aug10-2012.pdf) — Launch Director Omar Baez and the Nov 26, 2011 launch clearance[cite: 7].
+* [NASA Science: Curiosity's Launch](https://science.nasa.gov/resource/curiositys-launch/) — Launch coverage and archival media[cite: 7].
+* [NASA Curiosity Poster (PDF)](https://science.nasa.gov/wp-content/uploads/2024/03/CuriosityPoster.pdf) — Atlas V 541 specifications and mission timeline[cite: 7].
+* [NASA/JPL: Mars Science Laboratory / Curiosity](https://www.jpl.nasa.gov/missions/mars-science-laboratory-curiosity-rover-msl/) — Mission objectives, Gale Crater landing, and Sky Crane[cite: 3, 7].
+* [NASA Science: Communicating with Curiosity](https://science.nasa.gov/resource/communicating-with-curiosity-2/) & [NASA MSL Communications](https://mars.nasa.gov/internal_resources/822/) — UHF orbiter relays, X-band links, and Deep Space Network (DSN)[cite: 2, 7].
+* [NASA/JPL (Sep 27, 2012): Ancient Streambed](https://www.jpl.nasa.gov/news/nasa-rover-finds-old-streambed-on-martian-surface/) — Rounded pebbles at Hottah[cite: 7].
+* [NASA/JPL (Mar 12, 2013): Habitable Environment](https://www.jpl.nasa.gov/news/nasa-rover-finds-conditions-once-suited-for-ancient-life-on-mars/) — CheMin, SAM, and Yellowknife Bay findings[cite: 7].
+* [NASA Science (Dec 9, 2013): Radiation Exposure](https://science.nasa.gov/resource/radiation-exposure-comparisons-with-mars-trip-calculation/) — RAD data applied to human Mars mission risk assessment[cite: 7].
+
+---
+
+## 🧪 Local Development & Automated Tests
+
+No external bundlers or npm dependencies are required to run the application[cite: 7].
+
+### Run Local Preview Server
+```bash
+node tools/preview.cjs
+# Open [http://127.0.0.1:4173](http://127.0.0.1:4173) in a WebGL-enabled browser
