@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#081629"><title>CURIOSITY — от Земли до Марса</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#071321;color:#fff;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;touch-action:none}canvas{display:block;width:100%;height:100%;touch-action:none}
+#hud{position:fixed;inset:0;pointer-events:none}.top{position:absolute;top:max(18px,env(safe-area-inset-top));left:22px;right:22px;display:flex;justify-content:space-between;align-items:flex-start}.brand{font-size:12px;letter-spacing:.28em;font-weight:900;color:#fff}.meta{margin-top:9px;color:#d6e1eb;font-size:12px;max-width:250px;line-height:1.5}.status{text-align:right;font-size:11px;letter-spacing:.16em;color:#dce7f0}.counter{font-size:19px;font-weight:800;letter-spacing:.08em;margin-top:6px}.bottom{position:absolute;bottom:max(22px,env(safe-area-inset-bottom));left:22px;right:22px;display:flex;align-items:end;justify-content:space-between}.hint{font-size:10px;letter-spacing:.14em;color:#dbe6ef;text-shadow:0 1px 8px #000}.actions{display:flex;align-items:center;gap:12px;pointer-events:auto}.btn{border:1px solid #ffffff45;background:#07182bd9;color:white;border-radius:999px;padding:14px 25px;font-size:11px;font-weight:900;letter-spacing:.16em;cursor:pointer;backdrop-filter:blur(14px)}.primary{background:#d92e3d;border-color:#ff6873;min-width:150px;box-shadow:0 8px 35px #d92e3d55}.round{width:46px;height:46px;padding:0;font-size:20px}.btn:disabled{opacity:.35;cursor:default}.overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;text-align:center;pointer-events:none;text-shadow:0 4px 24px #000}.overlay.show{display:flex}.big{font-weight:900;font-size:clamp(42px,10vw,100px);letter-spacing:.12em}.sub{font-size:12px;letter-spacing:.28em;margin-top:12px;color:#e4edf4}.result{pointer-events:auto;margin-top:24px;display:flex;justify-content:center;gap:10px}.sound{position:fixed;right:22px;top:82px;pointer-events:auto;background:#07182b99;border:1px solid #ffffff35;color:#fff;border-radius:30px;padding:8px 12px;font-size:10px;letter-spacing:.12em}.mobile-note{display:none}@media(max-width:650px){.top{left:15px;right:15px}.bottom{left:15px;right:15px}.meta{max-width:190px;font-size:10px}.hint{max-width:135px;line-height:1.5}.btn{padding:13px 18px}.primary{min-width:125px}.mobile-note{display:block}}
+.overlay>div{max-width:96vw}.big{font-size:clamp(24px,7vw,72px)}.result{flex-wrap:wrap}@media(max-width:650px){.actions{gap:5px}.round{width:36px;padding:0}.primary{min-width:85px}}
+
+.brand{color:#a8edff}.meta,.hint,.status{background:#061629e8;padding:9px 11px;border:1px solid #8ad8f54a;border-radius:8px}.status{white-space:nowrap}.sound{top:96px}.hint{letter-spacing:.06em;line-height:1.55}
+#missionAction{position:fixed;bottom:max(82px,calc(env(safe-area-inset-bottom) + 70px));right:18px;pointer-events:auto;background:#104258;border-color:#78d7f1;touch-action:none}
+
+#historyControls{position:fixed;left:16px;top:max(157px,24vh);width:min(248px,37vw);pointer-events:auto}
+#historyControls label{display:inline-flex;align-items:center;gap:7px;padding:9px 12px;cursor:pointer}#historical-mode-toggle{accent-color:#71d9ef}#historyPanel{margin-top:8px;padding:10px 12px;border:1px solid #76bed177;border-radius:8px;background:#061629e8;color:#e0f4ff;font-size:12px;line-height:1.4;max-height:36vh;overflow:auto}
+#historyPanel p{margin:6px 0}#historyPanel summary{cursor:pointer;color:#a8edff}
+@media(max-width:650px){#historyControls{left:9px;width:min(240px,44vw);top:max(154px,23vh)}#historyPanel{font-size:11px;padding:7px;max-height:30vh}}
+
+#dock-stick{position:fixed;width:clamp(56px,16vmin,94px);aspect-ratio:1;border-radius:50%;border:1px solid #a8edffaa;background:#07182bc9;pointer-events:auto;touch-action:none;display:grid;place-items:center}
+#dock-stick[hidden]{display:none}
+#dock-stick[data-side="left"]{left:16px}#dock-stick[data-side="right"]{right:16px}
+#dock-stick[data-row="top"]{top:clamp(170px,38vh,42vh)}
+#dock-stick[data-row="bottom"]{bottom:clamp(124px,22vh,180px)}
+#dock-stick span{width:38%;aspect-ratio:1;border-radius:50%;background:#71d9ef;pointer-events:none}
+@media(max-height:480px){#dock-stick[data-row="top"]{top:28vh}#dock-stick[data-row="bottom"]{bottom:18vh}}
+
+.overlay.show{background:#04101be8;pointer-events:auto;z-index:10;padding:20px;overflow:auto}.overlay .sub{max-width:680px;font-size:15px;letter-spacing:0;line-height:1.6}.overlay .big{font-size:clamp(24px,5vw,48px)}
+#turnControls{position:fixed;right:18px;bottom:145px;pointer-events:auto}#turnControls button{min-width:48px;min-height:44px}#learn{position:fixed;left:16px;top:112px;pointer-events:auto}a{color:#98e6ff}
+@media(max-width:650px){.status{font-size:9px;max-width:45vw;white-space:normal}.meta{max-width:44vw}.hint{max-width:62vw;font-size:10px}.sub{font-size:13px!important}.btn{letter-spacing:.03em}#historyControls{top:175px}.sound{top:112px}.result .btn{min-height:44px}}
+
+#prevBtn,#nextBtn,#historyControls{display:none!important}.brand{letter-spacing:.1em}.status{font-size:10px}#counter{font-size:13px}.meta{max-width:260px}#overlay .sub{max-width:730px}
+</style><link rel="stylesheet" href="assets/eyes-theme.css"></head><body data-view="launch">
+<canvas id="game"></canvas><div id="hud">
+<div class="top"><div><div class="brand">CURIOSITY · ПУТЬ К МАРСУ</div><div class="meta" id="rocketMeta">ATLAS V 541 · CURIOSITY · 2011</div></div><div class="status"><div id="missionStatus">ГОТОВ К ПОЛЁТУ</div><div class="counter" id="counter">ЗЕМЛЯ → МАРС</div></div></div>
+<button class="sound" id="soundBtn">ЗВУК ВКЛ</button>
+<div id="dock-stick" role="group" aria-label="Джойстик стыковки" hidden><span></span></div><button id="missionAction" class="btn" hidden></button><button id="sas" class="btn" style="position:fixed;top:145px;right:18px;pointer-events:auto" hidden>СТАБ. ВЫРАВНИВАНИЕ</button><aside id="historyControls"><label class="btn"><input id="historical-mode-toggle" type="checkbox"> ПРОФИЛИ</label><details id="historyPanel" hidden><summary id="historyTitle"></summary><div id="historyInfo"></div></details></aside><button id="learn" class="btn">О ПОЛЁТЕ</button><div id="turnControls" hidden><button class="btn" id="turnLeft" aria-label="Повернуть влево">↶</button><button class="btn" id="turnRight" aria-label="Повернуть вправо">↷</button></div><div class="bottom"><div class="hint" id="hint">ПУТЬ К МАРСУ<br>СТРЕЛКИ / КРАЯ ЭКРАНА — РУЛЬ</div><div class="actions"><button class="btn round" id="prevBtn" aria-label="Предыдущий аппарат">‹</button><button class="btn round" id="nextBtn" aria-label="Следующий аппарат">›</button><button class="btn primary" id="startBtn">ПУСК</button></div></div>
+</div>
+<div class="overlay" id="overlay"><div><div class="big" id="overlayBig">3</div><div class="sub" id="overlaySub"></div><div class="result" id="resultBtns"></div></div></div>
+<div class="model-credit" id="model-credit">Загрузка модели NASA / VTAD…</div><script src="js/three.vendor.js"></script><script src="js/gltf-loader.vendor.js"></script><script src="assets/models/atlas-v-data.js"></script><script src="js/nasa-models.js"></script><script src="js/world.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/atmosphere.js"></script>
+<script src="js/engine-audio.js"></script>
+<script src="js/dynamics.js"></script>
+<script src="js/rockets-data.js"></script>
+<script src="js/sites.js"></script>
+<script src="js/docking-controls.js"></script>
+<script>
+const ROCKETS = [{name:'Atlas V 541',program:'NASA · MSL / Curiosity',year:2011,id:'atlas-v-541',file:'06-atlas.svg',engines:2}];
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const meta=document.getElementById('rocketMeta'),counter=document.getElementById('counter'),statusEl=document.getElementById('missionStatus'),hint=document.getElementById('hint');
+const overlay=document.getElementById('overlay'),obig=document.getElementById('overlayBig'),osub=document.getElementById('overlaySub'),resultBtns=document.getElementById('resultBtns');
+const prevBtn=document.getElementById('prevBtn');
+const profiles=[
+  {name:'ЛЕГКО', thrust:155, drag:.95, width:.13},
+  {name:'ОБЫЧНО', thrust:130, drag:.97, width:.105},
+  {name:'СЛОЖНО', thrust:105, drag:.98, width:.085}
+];
+const profile=()=>profiles[selected%profiles.length];
+const action=document.getElementById('missionAction');
+let actionHeld=false, actionPress=false, ascent=0, climb=0, fuel=1, burn=1, packets=0, touchdown=0, nextBeat=0, beat=0;
+const camera=createFlightCamera(), effects=createFlightParticles();
+let cameraOffset={x:0,y:0}, rcsTurn=0, rcsActivity=0, reentrySpeed=0;
+const dynamics=createFlightDynamics(), sas=document.getElementById("sas");
+let machPassed=false;
+let stage=0, debris=[], pointer=null, audio, engineAudio;
+let W=0,H=0,dpr=1,selected=0,state='IDLE',last=0,elapsed=0,phaseTime=0,rocketY=0,rocketX=0,vx=0,vy=0,tilt=0,cam=0,sound=true,keys={},groundX=0,landingPadX=0;
+const images=ROCKETS.map(r=>{let im=new Image();im.src='assets/rockets/'+r.file;return im});
+function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);groundX=H*.83;landingPadX=W*.5}
+addEventListener('resize',resize);resize();
+function setState(s){state=s;statusEl.textContent=s.replaceAll('_',' ');hint.textContent=s==='MANUAL_CONTROL'?'КРАЯ ЭКРАНА — РУЛЬ':'ЛИСТАЙТЕ ДЛЯ ВЫБОРА';}
+const historyToggle=document.getElementById('historical-mode-toggle');
+const historyPanel=document.getElementById('historyPanel');
+const historyTitle=document.getElementById('historyTitle');
+const historyInfo=document.getElementById('historyInfo');
+const historyById=new Map(HISTORICAL_ROCKETS.map(r=>[r.id,r]));
+let historicalMode=historyToggle.checked, rolloutStart=0, flightEvents=[], droppedMass=0, thrustBlend=1, completedRecovery;
+const historical=()=>historicalMode?historyById.get(ROCKETS[selected].id):undefined;
+const eventCount=()=>flightEvents.length;
+const recovery=()=>state==='ROLLOUT'||state==='SUCCESS'||state==='FAILED' ? completedRecovery : historical()?.landingSite;
+function updateMeta(){
+  const r=ROCKETS[selected], info=historical();
+  meta.textContent='Atlas V 541 · ULA · марсоход NASA Curiosity';
+  counter.textContent='ЗЕМЛЯ → МАРС';
+  updateHistoricalHUD();
+}
+function updateHistoricalHUD(){
+  const info=historical();
+  historyPanel.hidden=!historicalMode;
+  if(!historicalMode)return;
+  if(!info){
+    historyTitle.textContent=ROCKETS[selected].name;
+    historyInfo.textContent='Отдельного профиля нет. Используются стандартные игровые параметры.';
+    return;
+  }
+  historyTitle.textContent=info.name;
+  historyInfo.textContent='Визуальный профиль. Даты, места и характеристики старого каталога требуют проверки. Физика и возвращение условные.';
+}
+function select(n){
+  if(!['IDLE','SUCCESS','FAILED'].includes(state))return;
+  selected=(n+ROCKETS.length)%ROCKETS.length;
+  updateMeta();enter('IDLE');overlay.classList.remove('show');
+  document.getElementById('startBtn').style.display='';
+  document.getElementById('nextBtn').disabled=prevBtn.disabled=false;
+}
+historyToggle.addEventListener('change',()=>{
+  historicalMode=historyToggle.checked;
+  historyPanel.open=historicalMode&&W>650;
+  updateMeta();
+});
+function showOverlay(big,sub='',buttons=[]){obig.textContent=big;osub.textContent=sub;resultBtns.innerHTML='';buttons.forEach(([label,fn,primary])=>{let b=document.createElement('button');b.className='btn '+(primary?'primary':'');b.textContent=label;b.onclick=fn;resultBtns.appendChild(b)});overlay.classList.add('show');}
+function start(){if(state!=='IDLE'&&state!=='SUCCESS'&&state!=='FAILED')return;overlay.classList.remove('show');effects.clear();camera.reset();dynamics.reset();machPassed=false;debris=[];flightEvents=STAGING_PROFILES[ROCKETS[selected].file];droppedMass=0;thrustBlend=1;completedRecovery=undefined;stage=0;ascent=0;climb=0;fuel=1;packets=0;pointer=null;elapsed=0;phaseTime=0;rocketX=worldW*.5;rocketY=launchY();vx=0;vy=0;tilt=0;cam=0;setState('COUNTDOWN');document.getElementById('startBtn').style.display='none';document.getElementById('nextBtn').disabled=prevBtn.disabled=true;enableAudio();countdown();}
+let countdownIndex=0;
+const countdownLabels=['3','2','1','ПУСК'];
+function countdown(){
+  countdownIndex=0;
+  showOverlay(countdownLabels[0]);
+  tick();
+}
+function updateCountdown(){
+  const duration=countdownIndex===3?.45:.85;
+  if(phaseTime+1e-10<duration)return;
+  phaseTime-=duration;
+  countdownIndex++;
+  if(countdownIndex===4){
+    overlay.classList.remove('show');
+    enter('IGNITION');
+  }else{
+    showOverlay(countdownLabels[countdownIndex]);
+    tick();
+  }
+}
+function playScore(){
+  if(!sound||!audio||audio.state!=='running'||document.hidden||state==='IDLE')return;
+  const now=audio.currentTime;
+  if(now<nextBeat)return;
+  const orbital=['ORBITAL_INSERTION','DOCKING','TRANSFER','DOCKED'].includes(state);
+  const interval=orbital?.55:.36;
+  const notes=[45,52,57,60,43,50,55,59,41,48,53,57,43,50,55,62];
+  const note=notes[beat++%notes.length];
+  nextBeat=now+interval;
+  scoreTone(note,now,interval*1.8,.022,orbital?'sine':'triangle');
+  if(beat%4===1)scoreTone(note-12,now,interval*4,.028,'sine');
+}
+function scoreTone(note,time,duration,volume,type){
+  const osc=audio.createOscillator(),gain=audio.createGain();
+  osc.type=type;
+  osc.frequency.value=440*2**((note-69)/12);
+  gain.gain.setValueAtTime(.0001,time);
+  gain.gain.exponentialRampToValueAtTime(volume,time+.08);
+  gain.gain.exponentialRampToValueAtTime(.0001,time+duration);
+  osc.connect(gain);
+  gain.connect(audio.destination);
+  osc.start(time);
+  osc.stop(time+duration);
+}
+function enableAudio(){
+  if(!sound)return;
+  const Audio=window.AudioContext||window.webkitAudioContext;
+  if(!Audio)return;
+  try {
+    audio??=new Audio();
+    engineAudio??=createEngineAudio(audio);
+    audio.resume().catch(()=>{});
+  } catch {
+    // Keep the mission playable when the browser cannot initialize audio.
+  }
+}
+function tick(){
+  if(!sound||!audio)return;
+  const oscillator=audio.createOscillator(),gain=audio.createGain();
+  oscillator.frequency.value=620;
+  gain.gain.value=.025;
+  oscillator.connect(gain);
+  gain.connect(audio.destination);
+  oscillator.start();
+  oscillator.stop(audio.currentTime+.035);
+}
+function updateEngineAudio(pose){
+  if(!sound||!engineAudio||document.hidden)return;
+  let thrust=0;
+  if(state==='IGNITION')thrust=.78;
+  if(state==='ASCENT'&&stage<eventCount())thrust=actionHeld||keys.Space?1:.58;
+  if(state==='MANUAL_CONTROL'&&landingPlume)thrust=.68;
+  if(state==='DOCKING')thrust=.16*rcsActivity;
+  const density=1-FlightAtmosphere.fade(0,.84,pose.altitude/FlightAtmosphere.maxAltitude);
+  engineAudio.update(thrust,density);
+}
+function drawEnvironment(view){
+  FlightAtmosphere.drawSky(ctx,W,H,view.altitude);
+  const t=view.altitude/FlightAtmosphere.maxAltitude;
+  ctx.save();
+  ctx.globalAlpha=FlightAtmosphere.fade(.4,.84,t);
+  if(ctx.globalAlpha>0)drawEarth();
+  ctx.globalAlpha=1;
+  FlightAtmosphere.drawClouds(ctx,W,H,view,false);
+  ctx.globalAlpha=1-FlightAtmosphere.fade(.06,.46,t);
+  ctx.fillStyle='#4d8050';
+  ctx.beginPath();
+  ctx.moveTo(0,H*.77);
+  ctx.quadraticCurveTo(W*.3,H*.67,W*.58,H*.76);
+  ctx.quadraticCurveTo(W*.8,H*.68,W,H*.75);
+  ctx.lineTo(W,H);
+  ctx.lineTo(0,H);
+  ctx.fill();
+  ctx.fillStyle='#52636c';
+  ctx.fillRect(0,H*.84,W,H*.16);
+  ctx.fillStyle='#aeb9bd';
+  ctx.fillRect(W*.36,H*.82,W*.28,H*.18);
+  ctx.restore();
+}
+const continents=[
+  [[-.66,-.65],[-.54,-.81],[-.34,-.85],[-.18,-.74],[-.26,-.64],[-.18,-.51],[-.29,-.44],[-.44,-.57]],
+  [[-.29,-.43],[-.13,-.40],[-.07,-.30],[-.17,-.13],[-.23,-.08],[-.24,-.24]],
+  [[.08,-.69],[.17,-.81],[.35,-.84],[.51,-.73],[.65,-.68],[.52,-.55],[.35,-.59],[.25,-.49]],
+  [[.11,-.63],[.27,-.60],[.34,-.48],[.26,-.29],[.17,-.25],[.09,-.43],[.03,-.52]]
+];
+function drawEarth(){
+  const x=W*.52,y=H*1.13,r=Math.max(W*.55,H*.69);
+  const rim=ctx.createRadialGradient(x,y,r*.93,x,y,r*1.065);
+  rim.addColorStop(0,'#0755a500');
+  rim.addColorStop(.54,'#57d4ffae');
+  rim.addColorStop(1,'#54b8ff00');
+  ctx.fillStyle=rim;
+  ctx.beginPath();
+  ctx.arc(x,y,r*1.065,0,Math.PI*2);
+  ctx.fill();
+  ctx.save();
+  const opacity=ctx.globalAlpha;
+  ctx.beginPath();
+  ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.clip();
+  const ocean=ctx.createLinearGradient(0,y-r,0,y);
+  ocean.addColorStop(0,'#45aee1');
+  ocean.addColorStop(.45,'#146ca4');
+  ocean.addColorStop(1,'#07182f');
+  ctx.fillStyle=ocean;
+  ctx.fillRect(x-r,y-r,2*r,2*r);
+  ctx.fillStyle='#4d9d8e';
+  for(const coast of continents){
+    ctx.beginPath();
+    coast.forEach(([u,v],i)=>{
+      const px=x+u*r+Math.sin(last*.00015)*r*.13,py=y+v*r;
+      if(i===0)ctx.moveTo(px,py);
+      else ctx.lineTo(px,py);
+    });
+    ctx.closePath();
+    ctx.fill();
+  }
+  for(let i=0;i<20;i++){
+    ctx.globalAlpha=opacity*(.12+i%4*.06);
+    ctx.fillStyle='#e4f8ff';
+    ctx.beginPath();
+    ctx.ellipse(x+Math.sin(i*2.4+last*.00013)*r*.91,y-r*(.14+i*.044),
+      r*(.035+i%5*.018),r*.009,-.16,0,Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+function drawRocket(x,y,scale=1,angle=0){let im=images[selected];let w=Math.min(W*.25,110,H*.26)*scale,h=w*2.04;ctx.save();ctx.translate(x,y);ctx.rotate(angle);if(typeof AtlasPortrait!=='undefined'&&AtlasPortrait.ready){ctx.drawImage(AtlasPortrait.canvas,-w/2,-h/2,w,h)}else if(im.complete&&im.naturalWidth){ctx.drawImage(im,-w/2,-h/2,w,h)}else{ctx.fillStyle='white';ctx.fillRect(-10,-50,20,100)}ctx.restore();return {w,h}}
+function drawLaunchpad(){const site=historical()?.launchSite;if(site){HistoricalSites.launch(ctx,W,H,site,state,phaseTime);return}let y=H*.83;ctx.fillStyle='#7d898e';ctx.fillRect(0,y,W,H-y);ctx.fillStyle='#c5cdd0';ctx.fillRect(W*.28,y-7,W*.44,8);ctx.fillStyle='#384650';ctx.fillRect(W*.47,y-2,W*.06,12);ctx.strokeStyle='#e4e8e9';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(W*.5,y);ctx.lineTo(W*.5,y+32);ctx.stroke()}
+
+const {width:worldW,height:worldH,contact}=FlightWorld;
+const stickElement=document.getElementById('dock-stick');
+const stick=createDockingControls(stickElement,stickElement.firstElementChild);
+let targetSatellite, insertionWaypoint, insertionAltitude=0;
+function placeDockingStick(){
+  stick.place(screenX(targetSatellite.x),screenY(targetSatellite.y),W,H);
+}
+addEventListener('resize',()=>{if(state==='DOCKING')placeDockingStick()});
+const port={get x(){return targetSatellite.x-32},get y(){return targetSatellite.y}};
+const screenX=x=>x*W/worldW;
+const screenY=y=>y*H/worldH;
+const launchY=()=>worldH*.83-112.2;
+let prevState, currState, landingPlume=false;
+function snapshot(){
+  let x=rocketX,y=rocketY,angle=tilt;
+  if(state==='ORBITAL_INSERTION')angle=tilt;
+  if(['ASCENT','DOCKING','REENTRY'].includes(state))angle=dynamics.data.angle;
+  if(state==='TRANSFER'||state==='DOCKED'){x=port.x;y=port.y;angle=Math.PI/2}
+  if(state==='REENTRY'){x=worldW*(.5-phaseTime*.07);y=worldH*(.31+phaseTime*.08)}
+  let height=0;
+  if(state==='ASCENT')height=ascent/.88;
+  if(state==='ORBITAL_INSERTION')height=insertionAltitude;
+  if(state==='CRUISE')height=1;
+  if(['DOCKING','TRANSFER','DOCKED'].includes(state))height=1;
+  if(state==='REENTRY')height=1-.88*FlightAtmosphere.fade(0,2,phaseTime);
+  if(state==='MANUAL_CONTROL')height=.12*clamp((contact-y)/(contact-worldH*.47),0,1);
+  return {phase:state,x,y,angle,altitude:height*FlightAtmosphere.maxAltitude};
+}
+const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+const horizontal=()=>Number(!!keys.ArrowRight)-Number(!!keys.ArrowLeft);
+const vertical=()=>Number(!!keys.ArrowDown)-Number(!!keys.ArrowUp);
+function enter(next){
+  setState(next);
+  phaseTime=0;
+  actionHeld=actionPress=false;
+  sas.hidden=!['ASCENT','DOCKING','REENTRY'].includes(next);
+  stick.reset();
+  stickElement.hidden=next!=='DOCKING';
+  if(next==='DOCKING'){
+    placeDockingStick();
+    dynamics.align(Math.PI/2);
+  }
+  if(next==='REENTRY')dynamics.align(.12);
+  sas.textContent='СТАБ. '+({LEVEL:'ВЫРАВНИВАНИЕ',HOLD:'УДЕРЖАНИЕ',PROGRADE:'ПО СКОРОСТИ',RETROGRADE:'ПРОТИВ СКОРОСТИ',OFF:'ВЫКЛ'})[dynamics.mode];
+  const labels={ASCENT:'ТЯГА',DOCKING:'ТОРМОЗ',TRANSFER:'ПЕРЕДАТЬ',MANUAL_CONTROL:'ТЯГА'};
+  action.textContent=labels[next]||'';
+  action.hidden=!labels[next];
+  hint.textContent=next==='IDLE'?'ЗАПУСК → ПЕРЕЛЁТ → МАРС → ДАННЫЕ':'';
+}
+function section(x,y,w,h,angle=0,color='#e5eff7'){
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.rotate(angle);
+  ctx.fillStyle=color;
+  ctx.fillRect(-w/2,-h/2,w,h);
+  ctx.fillStyle='#70879b';
+  ctx.fillRect(-w/2,h*.22,w,h*.18);
+  ctx.restore();
+}
+function capsule(x,y,angle=0){
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.rotate(angle);
+  ctx.fillStyle='#e5eff7';
+  ctx.beginPath();
+  ctx.moveTo(0,-17);
+  ctx.lineTo(9,-7);
+  ctx.lineTo(15,15);
+  ctx.lineTo(-15,15);
+  ctx.lineTo(-9,-7);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle='#36789c';
+  ctx.fillRect(-5,-5,10,6);
+  ctx.restore();
+}
+function separate(event){
+  stage=event.stageIndex;
+  droppedMass+=event.massLoss;
+  thrustBlend=.65;
+  for(const item of event.debris){
+    const c=Math.cos(dynamics.data.angle), sin=Math.sin(dynamics.data.angle);
+    const x=rocketX+item.dx*c-item.dy*sin;
+    const y=rocketY+item.dx*sin+item.dy*c;
+    debris.push({...STAGING_PARTS[item.kind],x,y,px:x,py:y,releaseY:rocketY,
+      angle:dynamics.data.angle,previousAngle:dynamics.data.angle,
+      vx:item.kick,vy:-climb*worldH*.52,spin:Math.sign(item.kick)*1.4,age:0});
+  }
+  statusEl.textContent='ОТДЕЛЕНИЕ · '+stage+'/'+eventCount();
+}
+function updateDebris(dt){
+  for(const part of debris){
+    part.px=part.x;part.py=part.y;part.previousAngle=part.angle;
+    part.age+=dt;
+    part.vy+=190*dt;
+    part.x+=part.vx*dt;
+    part.y+=part.vy*dt;
+    part.angle+=part.spin*dt;
+  }
+  debris=debris.filter(part=>part.age<7&&part.y<worldH+90);
+}
+function drawDebris(alpha){
+  for(const part of debris){
+    const x=part.px+(part.x-part.px)*alpha;
+    const y=part.py+(part.y-part.py)*alpha;
+    section(screenX(x),debrisY(part,y,Math.min(W*.25,110,H*.26)*1.02),
+      part.w,part.h,part.previousAngle+(part.angle-part.previousAngle)*alpha,part.color);
+  }
+}
+const portX=()=>screenX(port.x);
+const portY=()=>screenY(port.y);
+function satellite(){
+  const x=screenX(targetSatellite.x),y=portY();
+  ctx.fillStyle='#528fcb';
+  ctx.fillRect(x-31,y-22,23,13);
+  ctx.fillRect(x+8,y-22,23,13);
+  ctx.strokeStyle='#a6d7fa';
+  for(const edge of [x-31,x+8]){
+    ctx.strokeRect(edge,y-22,23,13);
+    for(let cell=1;cell<4;cell++)ctx.strokeRect(edge+cell*5.75,y-22,0,13);
+  }
+  section(x,y,19,29);
+  ctx.fillStyle='#c5a965';
+  ctx.fillRect(portX(),y-4,Math.max(4,x-9-portX()),8);
+  ctx.strokeStyle='#8df6bd';
+  ctx.beginPath();
+  ctx.arc(portX(),y,10,0,Math.PI*2);
+  ctx.stroke();
+}
+function docking(dt){
+  const dx=stick.active?stick.vector.x:pointer?clamp(((pointer.x-cameraOffset.x)*worldW/W-rocketX)/35,-1,1):horizontal();
+  const dy=stick.active?stick.vector.y:pointer?clamp(((pointer.y-cameraOffset.y)*worldH/H-rocketY)/35,-1,1):vertical();
+  const braking=(actionHeld||keys.Space)&&fuel>0;
+  const throttle=!braking&&fuel>0?1:0;
+  rcsTurn=dx*throttle;
+  rcsActivity=braking&&Math.hypot(vx,vy)>1?1:Math.min(1,Math.hypot(dx,dy))*throttle;
+  fuel=Math.max(0,fuel-dt*(.012*Math.hypot(dx,dy)*throttle+(braking?.02:0)));
+  const damping=Math.exp(-(braking?4:0)*dt);
+  vx=clamp((vx+dx*55*dt*throttle)*damping,-100,100);
+  vy=clamp((vy+dy*55*dt*throttle)*damping,-100,100);
+  if((rocketX<=18&&vx<0)||(rocketX>=worldW-18&&vx>0))vx=0;
+  if((rocketY<=worldH*.15&&vy<0)||(rocketY>=worldH*.78&&vy>0))vy=0;
+  rocketX=clamp(rocketX+vx*dt,18,worldW-18);
+  rocketY=clamp(rocketY+vy*dt,worldH*.15,worldH*.78);
+  const range=Math.hypot(rocketX-port.x,rocketY-port.y);
+  const speed=Math.hypot(vx,vy);
+  hint.textContent='СТРЕЛКИ · ПРОБЕЛ — ТОРМОЗ · ДИСТАНЦИЯ '+Math.round(range)+' · СКОРОСТЬ '+Math.round(speed)+' / 26 · ТОПЛИВО '+Math.round(fuel*100)+'%';
+  const angle=Math.abs(Math.atan2(Math.sin(dynamics.data.angle-Math.PI/2),Math.cos(dynamics.data.angle-Math.PI/2)));
+  hint.textContent+=' · УГОЛ '+Math.round(angle*180/Math.PI)+'° / 15°';
+  if(range<=13){
+    if(speed>26||angle>Math.PI/12)failDock(speed>26?'Слишком быстрый контакт. Тормозите заранее.':'Нос не совмещён с узлом. Выровняйте аппарат.');
+    else enter('TRANSFER');
+  }else if(fuel<=0)failDock('Топливо манёвров закончилось. Используйте короткие импульсы.');
+}
+function startLanding(){
+  overlay.classList.remove('show');
+  pointer=null;
+  effects.clear();camera.reset();
+  rocketX=worldW*.36;
+  rocketY=worldH*.47;
+  vx=tilt=0;
+  vy=worldH*.062;
+  burn=1;
+  landingPlume=false;
+  enter('MANUAL_CONTROL');
+  prevState=currState=snapshot();
+}
+function landing(dt){
+  const {thrust,drag,width}=profile();
+  const dir=pointer?(pointer.x<W/2?-1:1):horizontal();
+  vx=(vx+dir*thrust*dt)*Math.pow(drag,dt*60);
+  rocketX=clamp(rocketX+vx*dt,18,worldW-18);
+  rcsTurn=(dir*.30-tilt)*4;
+  tilt+=(dir*.30-tilt)*Math.min(1,dt*4);
+  const gravity=worldH*.028;
+  const braking=(actionHeld||keys.Space)&&burn>0;
+  if(braking)burn=Math.max(0,burn-dt*.61);
+  const parachute=recovery()?.type==='splashdown'&&(braking||rocketY>worldH*.68);
+  if(parachute)vy*=Math.exp(-.95*dt);
+  vy=Math.max(worldH*.024,vy+(gravity-(braking?worldH*.13:0))*dt);
+  rocketY+=vy*dt;
+  const offset=Math.round((rocketX-worldW*.5)/worldW*100);
+  const offsetText='ОТКЛОНЕНИЕ '+Math.abs(offset)+'% '+(offset<0?'ВЛЕВО':offset>0?'ВПРАВО':'');
+  hint.textContent='← → РУЛЬ · ПРОБЕЛ — ТЯГА · '+offsetText+' · ТОПЛИВО '+Math.round(burn*100)+'% · СНИЖЕНИЕ '+Math.round(vy/worldH*100)+' / 12';
+  landingPlume=braking;
+  if(rocketY<contact)return;
+  rocketY=contact;
+  const aligned=Math.abs(rocketX-worldW*.5)<=worldW*width;
+  touchdown=Math.round(vy/worldH*100);
+  const stable=Math.abs(vx)<35&&Math.abs(tilt)<.23&&vy/worldH<=.12;
+  const success=aligned&&stable;
+  completedRecovery=recovery();
+  if(success&&completedRecovery?.type==='runway'){rolloutStart=rocketX;enter('ROLLOUT');return}
+  enter(success?'SUCCESS':'FAILED');
+  showOverlay(success?(recovery()?.type==='splashdown'?'ПРИВОДНЕНИЕ УСПЕШНО':'ПОСАДКА УСПЕШНА'):'ПОСАДКА НЕ УДАЛАСЬ',
+    (success?'Мягкое касание: скорость и наклон погашены. ':!aligned?'Промах мимо площадки. ':Math.abs(vx)>=35?'Большая боковая скорость. ':Math.abs(tilt)>=.23?'Большой наклон. ':'Быстрое снижение. ')+offsetText+' · СНИЖЕНИЕ '+touchdown+' / 12 · ДАННЫЕ '+packets+'/3',
+    [['ПОВТОРИТЬ ПОСАДКУ',startLanding,!success],['НОВЫЙ ПОЛЁТ',start,false],...(success?[['ИССЛЕДОВАТЬ МАРС',()=>{location.href='mars.html'},true]]:[])]);
+}
+function startInsertion(){
+  const targets=FlightWorld.orbitalTargets(W,H);
+  targetSatellite=targets.satellite;
+  insertionWaypoint=targets.waypoint;
+  // Continue from the ascent camera's last visible pose.
+  const halfHeight=Math.min(W*.25,110,H*.26)*1.02;
+  rocketY=ascentY(rocketY,halfHeight)*worldH/H;
+  vx=0;
+  vy=-Math.min(100,climb*worldH);
+  tilt=dynamics.data.angle;
+  insertionAltitude=1;
+  pointer=null;
+  enter('ORBITAL_INSERTION');
+}
+function updateInsertion(dt){
+  const x=FlightWorld.coastAxis(rocketX,vx,insertionWaypoint.x,dt);
+  const y=FlightWorld.coastAxis(rocketY,vy,insertionWaypoint.y,dt);
+  rocketX=x.position;rocketY=y.position;vx=x.velocity;vy=y.velocity;
+  tilt+=(Math.PI/2-tilt)*(1-Math.exp(-3*dt));
+  const range=Math.hypot(rocketX-insertionWaypoint.x,rocketY-insertionWaypoint.y);
+  const speed=Math.hypot(vx,vy);
+  hint.textContent='АВТОПИЛОТ · ДО ЦЕЛИ '+Math.round(range)+' · ОТН. СКОРОСТЬ '+speed.toFixed(1);
+  if(range>.6||speed>.65)return;
+  rocketX=insertionWaypoint.x;rocketY=insertionWaypoint.y;
+  vx=vy=0;
+  enter('DOCKING');
+}
+function update(dt){
+  prevState=snapshot();
+  rcsTurn=rcsActivity=0;
+  phaseTime+=dt;
+  switch(state){
+    case 'COUNTDOWN': updateCountdown(); break;
+    case 'IGNITION':
+      rocketX=worldW*.5;
+      rocketY=launchY();
+      if(phaseTime>=2)enter('ASCENT');
+      break;
+    case 'ASCENT': {
+      const boosting=actionHeld||keys.Space;
+      const custom=historical()?.physics;
+      launchFuel=Math.max(0,launchFuel-dt*(boosting?.17:.09));
+      if(launchFuel<=0){enter('FAILED');showOverlay('ТОПЛИВО ЗАКОНЧИЛОСЬ','Повторите запуск с меньшим наклоном.',[['ПОВТОРИТЬ ЗАПУСК',start,true]]);break;}
+      climb+=dt*FlightWorld.ascentAcceleration(boosting,droppedMass,ascent/.88,custom,thrustBlend);
+      ascent+=climb*dt*Math.max(0,Math.cos(dynamics.data.angle));
+      rocketY=Math.max(worldH*.27,rocketY-climb*worldH*dt);
+      thrustBlend+=(1-thrustBlend)*(1-Math.exp(-dt*6));
+      while(flightEvents[stage]&&ascent>=flightEvents[stage].triggerHeight)separate(flightEvents[stage]);
+      hint.textContent='ПРОБЕЛ — ТЯГА · СТУПЕНИ '+stage+'/'+eventCount()+' · СКОРОСТЬ '+Math.round(climb*100);
+      hint.textContent+=' · ВЫСОТА '+Math.min(100,Math.round(ascent/.88*100))+'% · ТОПЛИВО '+Math.round(launchFuel*100)+'%';
+      if(ascent>=.88&&Math.abs(dynamics.data.angle)<.61)startCruise();
+      break;
+    }
+    case 'CRUISE':
+      hint.textContent='26.11.2011 → 06.08.2012 · МЕЖПЛАНЕТНЫЙ ПЕРЕЛЁТ · ВРЕМЯ СЖАТО';
+      if(phaseTime>=6)enter('REENTRY');break;
+    case 'ORBITAL_INSERTION': updateInsertion(dt); break;
+    case 'DOCKING': docking(dt); break;
+    case 'TRANSFER':
+      hint.textContent='ПРОВЕРКА СВЯЗИ · '+packets+'/3 · '+['КАРТА ПОСАДКИ','ПЛАН ИССЛЕДОВАНИЯ','ТЕЛЕМЕТРИЯ'][packets]+' · ПРОБЕЛ / ПЕРЕДАТЬ';
+      if(actionPress){
+        packets++;
+        tick();
+        if(packets===3){
+          enter('DOCKED');
+          showOverlay('КУРС НА МАРС','Проверка завершена. Перелёт сжат до нескольких секунд. Далее — спуск аппарата с марсоходом.');
+        }
+      }
+      break;
+    case 'DOCKED':
+      if(phaseTime>=6){
+        overlay.classList.remove('show');
+        enter('REENTRY');
+      }
+      break;
+    case 'REENTRY':
+      reentrySpeed=1-phaseTime*.24;
+      hint.textContent=phaseTime<2?'ВХОД В АТМОСФЕРУ · ТЕПЛОВОЙ ЭКРАН':phaseTime<4?'ПАРАШЮТ · СБРОС ТЕПЛОВОГО ЭКРАНА':'ОТДЕЛЕНИЕ ОТ ПАРАШЮТА · РАКЕТНЫЙ СПУСК';
+      if(phaseTime>=6)startLanding();
+      break;
+    case 'MANUAL_CONTROL': landing(dt); break;
+    case 'ROLLOUT':
+      rocketX=clamp(rolloutStart+90*(1-Math.exp(-phaseTime*1.6)),18,worldW-18);
+      if(phaseTime>=2){
+        enter('SUCCESS');
+        showOverlay('ПОСАДКА ЗАВЕРШЕНА','ДАННЫЕ '+packets+'/3',
+          [['ПОВТОРИТЬ ПОСАДКУ',startLanding,false],['НОВЫЙ ПОЛЁТ',start,true]]);
+      }
+      break;
+  }
+  actionPress=false;
+  updateFlightDynamics(dt);
+  currState=snapshot();
+  if(prevState.phase!==currState.phase)prevState=currState;
+  updateDebris(dt);
+  updateEffects(dt,currState);
+}
+function updateFlightDynamics(dt){
+  if(!['ASCENT','DOCKING'].includes(state))return;
+  const orbit=state==='DOCKING', entry=state==='REENTRY';
+  const progress=clamp(ascent/.88,0,1);
+  const air=orbit?0:entry?FlightAtmosphere.fade(0,2,phaseTime):Math.exp(-progress*5);
+  const speed=orbit?0:entry?2.3-phaseTime*.74:climb*7;
+  const thrust=orbit||entry||stage===eventCount()?0:(actionHeld||keys.Space?1:.58)*thrustBlend;
+  const reference=orbit?Math.PI/2+(stick.active&&fuel>0&&!actionHeld&&!keys.Space?stick.vector.x*.32:0):entry?.12:0;
+  const path=orbit&&Math.hypot(vx,vy)>2?Math.atan2(vx,-vy):entry?Math.PI-.4:0;
+  const turn=dynamics.update(dt,{air,speed,thrust,stage,propellant:1-progress,vehicle:historical()?.physics,
+    steer:(Number(!!keys.KeyE)-Number(!!keys.KeyQ))*.85,path,entry,reference});
+  if(Math.abs(turn)>.09){
+    rcsTurn=turn;
+    rcsActivity=Math.max(rcsActivity,Math.abs(turn));
+  }
+  const {q,mach,heat,integrity,rcs}=dynamics.data;
+  if(q>.38&&thrust>.9)camera.addShake(Math.min(10,q*12));
+  if(!orbit&&mach>=1&&!machPassed){
+    machPassed=true;
+    if(sound&&audio?.state==='running')scoreTone(30,audio.currentTime,.34,.14,'triangle');
+    camera.addShake(6);
+  }
+  if(entry)hint.textContent='Q / E — ПОВОРОТ · S — СТАБИЛИЗАЦИЯ';
+  if(integrity<=0){
+    completedRecovery=recovery();
+    enter('FAILED');
+    showOverlay('АППАРАТ РАЗРУШЕН','Уменьшайте тягу при нагрузках и сохраняйте пологий угол входа.',
+      [['НОВЫЙ ПОЛЁТ',start,true],['ДРУГОЙ АППАРАТ',()=>select(selected+1),false]]);
+  }
+}
+sas.onclick=()=>{dynamics.cycle();sas.textContent='СТАБ. '+({LEVEL:'ВЫРАВНИВАНИЕ',HOLD:'УДЕРЖАНИЕ',PROGRADE:'ПО СКОРОСТИ',RETROGRADE:'ПРОТИВ СКОРОСТИ',OFF:'ВЫКЛ'})[dynamics.mode]};
+function debrisY(part,y,halfHeight){
+  return ascentY(part.releaseY,halfHeight)+screenY(y-part.releaseY);
+}
+function ascentY(y,halfHeight){
+  const projected=H*.83-halfHeight-screenY(launchY()-y);
+  return Math.max(H*.27,projected);
+}
+function updateEffects(dt,pose){
+  const halfHeight=Math.min(W*.25,110,H*.26)*1.02;
+  const x=screenX(pose.x);
+  const y=state==='MANUAL_CONTROL'?H*.82-15+screenY(pose.y-contact):screenY(pose.y);
+  const boosting=actionHeld||keys.Space;
+  const tracking=state==='ASCENT'||state==='REENTRY'||state==='MANUAL_CONTROL';
+  const ground=H*.83;
+  const denseReentry=state==='REENTRY'&&phaseTime>.35&&reentrySpeed>.58;
+  if(state==='IGNITION')camera.addShake(3.2);
+  if(state==='ASCENT'&&boosting&&stage<eventCount())camera.addShake(5);
+  if(denseReentry)camera.addShake(6*reentrySpeed);
+  if(Math.abs(rcsTurn)>.09)camera.addShake(Math.min(1.8,Math.abs(rcsTurn)*1.5));
+  camera.update(dt,tracking?clamp((W*.5-x)*.12,-12,12):0,
+    tracking?clamp((H*.52-y)*.12,-16,16):0);
+
+  effects.update(dt,ground,burst=>{
+    for(const part of debris){
+      if(part.age<.95)burst(part.age<.17?'spark':'smoke',screenX(part.x),
+        debrisY(part,part.y,halfHeight),Math.ceil((1-part.age)*2),0,-.3);
+    }
+    const site=historical()?.launchSite;
+    if(site?.vent&&(state==='COUNTDOWN'||state==='IGNITION')){
+      burst('smoke',W*.5+10,ground-halfHeight*1.35,2,.8,.1);
+    }
+    if(site?.deluge&&((state==='COUNTDOWN'&&countdownIndex>=2)||state==='IGNITION')){
+      for(const side of [-1,1])burst('smoke',W*.5+side*28,ground-9,3,side*.85,-.3);
+    }
+    if(state==='IGNITION'){
+      burst('smoke',x,ground-13,5,0,.55);
+      burst('fire',x,ground-5,4);
+      burst('spark',x,ground-8,4,0,-.45);
+    }
+    if(state==='ASCENT'&&stage<eventCount()){
+      const nozzle=ascentY(pose.y,halfHeight)+(stage===0?halfHeight:40);
+      const thinAir=ascent>.28;
+      const count=stage===0?clamp(ROCKETS[selected].engines,1,12):3;
+      burst(thinAir?'plasma':'fire',x,nozzle,count+(boosting?3:0));
+      if(!thinAir)burst('smoke',x,nozzle,2);
+    }
+    if(state==='REENTRY'||(state==='ASCENT'&&dynamics.data.mach>=1&&dynamics.data.q>.09)){
+      burst('plasma',x+Math.sin(pose.angle)*12,y-Math.cos(pose.angle)*12,3+Math.min(7,Math.floor(dynamics.data.heat*8)),.25,-.75);
+    }
+    if(state==='MANUAL_CONTROL'&&landingPlume)burst('fire',x,y+16,4);
+    if(Math.abs(rcsTurn)>.09){
+      const side=Math.sign(rcsTurn);
+      const c=Math.cos(pose.angle),sin=Math.sin(pose.angle);
+      burst('rcs',x+side*12*c+9*sin,y+side*12*sin-9*c,3,side*c,side*sin);
+    }
+  });
+}
+function drawRecoveryCraft(x,y,angle,canopy){
+  const site=recovery();
+  if(site?.type==='runway'){drawRocket(x,y+7,.32,Math.PI/2+angle*.3);return}
+  if(site?.type==='splashdown'&&canopy){
+    for(let i=0;i<site.chutes;i++){
+      const cx=x+(i-(site.chutes-1)/2)*22;
+      ctx.beginPath();ctx.moveTo(x,y-10);ctx.lineTo(cx,y-47);
+      ctx.strokeStyle='#f2f0e2';ctx.stroke();
+      ctx.beginPath();ctx.arc(cx,y-47,11,Math.PI,Math.PI*2);
+      ctx.fillStyle=i%2?'#fff2d9':'#f68f53';ctx.fill();
+    }
+  }
+  capsule(x,y,angle);
+}
+function render(alpha){
+  const current=snapshot();
+  const pose=currState?.phase===state
+    ? FlightWorld.interpolate(prevState,currState,alpha)
+    : current;
+  const halfHeight=Math.min(W*.25,110,H*.26)*1.02;
+  const pad=H*.82;
+  const landingY=y=>pad-15+screenY(y-contact);
+  const x=screenX(pose.x);
+  const y=state==='ASCENT'
+    ? ascentY(pose.y,halfHeight)
+    : screenY(pose.y);
+  const steady=camera.position();
+  const view={
+    altitude:pose.altitude,
+    cameraX:-steady.x,
+    cameraY:-steady.y-screenY(worldH*pose.altitude/FlightAtmosphere.maxAltitude),
+    time:last/1000
+  };
+  drawEnvironment(view);
+  cameraOffset=camera.offset();
+  ctx.save();
+  ctx.translate(cameraOffset.x,cameraOffset.y);
+  switch(state){
+    case 'IDLE':
+    case 'COUNTDOWN':
+    case 'IGNITION':
+      if(state==='IDLE'&&typeof briefing!=='undefined'&&briefing){
+        drawRocket(W*(W>700?.77:.72),H*.52,Math.min(H*.72,550)/(Math.min(W*.25,110,H*.26)*2.04));
+      }else{drawLaunchpad();drawRocket(W*.5,H*.83-halfHeight);}
+      break;
+    case 'ASCENT':
+      if(historical()&&ascent<.25)drawLaunchpad();
+      if(stage===0)drawRocket(x,y,1,pose.angle);
+      else{
+        ctx.save();
+        ctx.translate(x,y);
+        ctx.rotate(pose.angle);
+        if(stage<eventCount())section(0,24,18,32);
+        capsule(0,0);
+        if(stage===1)section(0,-5,25,36);
+        ctx.restore();
+      }
+      break;
+    case 'DOCKING':
+      ctx.strokeStyle='#8edbfb88';
+      ctx.beginPath();
+      ctx.moveTo(x,y);
+      ctx.lineTo(x+screenX(vx*.7),y+screenY(vy*.7));
+      ctx.stroke();
+      satellite();
+      capsule(x,y,pose.angle);
+      break;
+    case 'TRANSFER':
+    case 'DOCKED':
+      satellite();
+      capsule(x,y,pose.angle);
+      break;
+    case 'CRUISE':
+      ctx.fillStyle='#b76a45';ctx.beginPath();ctx.arc(W*.78,H*.36,Math.min(W,H)*.12,0,Math.PI*2);ctx.fill();
+      section(W*(.28+phaseTime*.025),H*.5,45,9,0,'#627da3');capsule(W*(.28+phaseTime*.025),H*.5,Math.PI/2);break;
+    case 'REENTRY':
+      capsule(x,y,pose.angle);
+      if(phaseTime>=2&&phaseTime<4){ctx.strokeStyle='#ddd';ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-24,y-60);ctx.moveTo(x,y);ctx.lineTo(x+24,y-60);ctx.stroke();ctx.fillStyle='#e4bda3';ctx.beginPath();ctx.arc(x,y-60,27,Math.PI,Math.PI*2);ctx.fill();}
+      break;
+    case 'ORBITAL_INSERTION':
+      satellite();
+      capsule(x,y,pose.angle);
+      break;
+    case 'MANUAL_CONTROL': {
+      const {width,drag}=profile();
+      const gravity=worldH*.028;
+      const height=Math.max(0,contact-rocketY);
+      const time=2*height/(vy+Math.sqrt(vy*vy+2*gravity*height));
+      const damping=-60*Math.log(drag);
+      const predicted=screenX(clamp(rocketX+vx*(1-Math.exp(-damping*time))/damping,18,worldW-18));
+      if(recovery())HistoricalSites.landing(ctx,W,H,recovery(),last/1000,width);
+      else{
+      ctx.fillStyle='#d3e0e8';
+      ctx.fillRect(W*(.5-width),pad,W*width*2,7);
+      ctx.fillStyle='#283e53';
+      ctx.fillRect(W*.5-2,pad,4,7);
+      }
+      ctx.fillStyle='#ffdf74';
+      ctx.beginPath();
+      ctx.moveTo(predicted-6,pad-13);
+      ctx.lineTo(predicted+6,pad-13);
+      ctx.lineTo(predicted,pad-3);
+      ctx.fill();
+      drawRecoveryCraft(x,landingY(pose.y),pose.angle,rocketY>worldH*.68||landingPlume);
+      break;
+    }
+    case 'ROLLOUT':
+    case 'SUCCESS':
+    case 'FAILED':
+      if(recovery())HistoricalSites.landing(ctx,W,H,recovery(),last/1000,profile().width);
+      else drawLaunchpad();
+      drawRecoveryCraft(x,pad-15,pose.angle,false);
+      break;
+  }
+  updateEngineAudio(pose);
+  playScore();
+  drawDebris(alpha);
+  effects.draw(ctx);
+  ctx.restore();
+  FlightAtmosphere.drawClouds(ctx,W,H,view,true);
+}
+const advance=FlightWorld.clock(dt=>update(dt),render);
+function frame(t){
+  last=t;
+  advance(t);
+  requestAnimationFrame(frame);
+}
+const selecting=()=>['IDLE','SUCCESS','FAILED'].includes(state);
+document.getElementById('startBtn').onclick=start;
+prevBtn.onclick=()=>select(selected-1);
+document.getElementById('nextBtn').onclick=()=>select(selected+1);
+document.getElementById('soundBtn').onclick=e=>{
+  sound=!sound;
+  if(sound)enableAudio();
+  else if(audio){
+    engineAudio?.update(0,0);
+    audio.suspend().catch(()=>{});
+  }
+  e.currentTarget.textContent=sound?'ЗВУК ВКЛ':'ЗВУК ВЫКЛ';
+};
+addEventListener('keydown',e=>{
+  if(e.target===historyToggle&&e.code==='Space')return;
+  if(e.code==='Space'&&['ASCENT','DOCKING','TRANSFER','MANUAL_CONTROL'].includes(state)){
+    e.preventDefault();
+    keys.Space=true;
+    if(!e.repeat)actionPress=true;
+    return;
+  }
+  if(!sas.hidden&&e.code==='KeyS'&&!e.repeat){sas.click();return}
+  if(e.code==='KeyQ'||e.code==='KeyE'){keys[e.code]=true;return}
+  if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;
+  e.preventDefault();
+  keys[e.key]=true;
+  if(selecting()&&!e.repeat){
+    if(e.key==='ArrowLeft')select(selected-1);
+    if(e.key==='ArrowRight')select(selected+1);
+  }
+});
+addEventListener('keyup',e=>{delete keys[e.key];delete keys[e.code];if(e.code==='Space')delete keys.Space});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){engineAudio?.update(0,0);keys={};pointer=null;actionHeld=actionPress=false;stick.reset()}});
+addEventListener('blur',()=>{keys={};pointer=null;actionHeld=false;stick.reset()});
+canvas.addEventListener('pointerdown',e=>{
+  if(pointer)return;
+  canvas.setPointerCapture(e.pointerId);
+  pointer={id:e.pointerId,x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY};
+});
+canvas.addEventListener('pointermove',e=>{
+  if(pointer?.id!==e.pointerId)return;
+  pointer.x=e.clientX;
+  pointer.y=e.clientY;
+});
+canvas.addEventListener('pointerup',e=>{
+  if(pointer?.id!==e.pointerId)return;
+  const dx=e.clientX-pointer.startX,dy=e.clientY-pointer.startY;
+  pointer=null;
+  if(!selecting())return;
+  if(Math.abs(dx)>35&&Math.abs(dx)>Math.abs(dy))select(selected+(dx<0?1:-1));
+  else if(Math.abs(dx)<15&&Math.abs(dy)<15)select(selected+1);
+});
+function clearPointer(e){if(pointer?.id===e.pointerId)pointer=null}
+canvas.addEventListener('pointercancel',clearPointer);
+canvas.addEventListener('lostpointercapture',clearPointer);
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+action.addEventListener('pointerdown',e=>{
+  action.setPointerCapture(e.pointerId);
+  actionHeld=true;
+});
+for(const event of ['pointerup','pointercancel','lostpointercapture']){
+  action.addEventListener(event,()=>{actionHeld=false});
+}
+action.addEventListener('click',()=>{if(state==='TRANSFER')actionPress=true});
+updateMeta();
+enter('IDLE');
+requestAnimationFrame(frame);
+</script><script src="js/learning.js"></script><script src="js/mars-landing.js"></script><script src="js/eyes-flight.js"></script></body></html>

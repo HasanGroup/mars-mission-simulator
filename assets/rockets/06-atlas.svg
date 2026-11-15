@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 245" role="img" aria-label="Atlas V 541 — условный силуэт">
+<defs><linearGradient id="body" x1="0" x2="1"><stop stop-color="#b2b8bd"/><stop offset=".4" stop-color="#f7f4ea"/><stop offset="1" stop-color="#9ca9b1"/></linearGradient></defs>
+<g fill="#e5e3dc" stroke="#7d858b" stroke-width="1.5"><path d="M20 125l5-12 5 12v91H20z"/><path d="M32 110l5-12 5 12v106H32z"/><path d="M78 110l5-12 5 12v106H78z"/><path d="M90 125l5-12 5 12v91H90z"/></g>
+<path d="M44 83h32v135H44z" fill="url(#body)" stroke="#8a9499" stroke-width="2"/>
+<path d="M39 33Q40 15 60 5Q80 15 81 33v48l-5 9H44l-5-9z" fill="url(#body)" stroke="#8a9499" stroke-width="2"/>
+<path d="M44 157h32v53H44z" fill="#b18764"/><path d="M44 97h32M44 147h32" stroke="#78848b" stroke-width="3"/>
+<path d="M48 217h9l2 12H45zM63 217h9l3 12H61z" fill="#49535c"/>
+<g fill="#4e5963"><path d="M20 215h10l2 9H18zM32 215h10l2 9H30zM78 215h10l2 9H76zM90 215h10l2 9H88z"/></g>
+<text x="60" y="51" text-anchor="middle" font-size="9" font-family="sans-serif" fill="#344f6a">MSL</text><text x="60" y="126" text-anchor="middle" font-size="7" font-family="sans-serif" fill="#344f6a">ATLAS V</text>
+</svg>

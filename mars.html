@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CURIOSITY · ПУТЬ К МАРСУ — Интерактивный симулятор</title>
+<style>
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    overflow: hidden;
+    background: #0a0604;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #e8d5c4;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  #canvas-container {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+  }
+
+  canvas { display: block; width: 100%; height: 100%; }
+
+  /* ========== HUD ========== */
+  #hud {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .panel {
+    pointer-events: auto;
+    background: linear-gradient(145deg, rgba(18,10,6,0.82), rgba(28,14,8,0.75));
+    border: 1px solid rgba(200,120,60,0.25);
+    border-radius: 12px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,180,100,0.08);
+  }
+
+  /* Top bar */
+  #top-bar {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  #mission-panel {
+    flex: 1;
+    max-width: 420px;
+    padding: 14px 18px;
+  }
+
+  #mission-panel h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: #ff9a4a;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  #mission-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #f5e6d8;
+    margin-bottom: 4px;
+  }
+
+  #mission-desc {
+    font-size: 12.5px;
+    color: #c4a990;
+    line-height: 1.45;
+  }
+
+  #mission-progress {
+    margin-top: 10px;
+    height: 4px;
+    background: rgba(80,40,20,0.5);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  #mission-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #e07030, #ff9a4a);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* Status panel (right) */
+  #status-panel {
+    padding: 12px 16px;
+    min-width: 180px;
+  }
+
+  .stat-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .stat-row:last-child { margin-bottom: 0; }
+
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #a08070;
+    width: 58px;
+  }
+
+  .stat-bar-bg {
+    flex: 1;
+    height: 8px;
+    background: rgba(60,30,15,0.6);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .stat-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+
+  #energy-bar { background: linear-gradient(90deg, #2a8a4a, #4ecf6e); }
+  #energy-bar.low { background: linear-gradient(90deg, #a03020, #e05030); }
+  #integrity-bar { background: linear-gradient(90deg, #3a6a9a, #5aa0d0); }
+
+  .stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 36px;
+    text-align: right;
+    color: #e8d5c4;
+  }
+
+  /* Mini-map */
+  #minimap-wrap {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 160px;
+    height: 160px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(200,120,60,0.3);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+  }
+
+  #minimap {
+    width: 100%;
+    height: 100%;
+    background: #1a0e08;
+  }
+
+  #minimap-label {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: rgba(255,160,80,0.7);
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  /* Controls hint */
+  #controls-hint {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    padding: 12px 16px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #b09080;
+  }
+
+  #controls-hint kbd {
+    display: inline-block;
+    background: rgba(60,30,15,0.7);
+    border: 1px solid rgba(180,100,50,0.35);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    color: #ffb070;
+    margin: 0 2px;
+  }
+
+  /* Scan result modal */
+  #scan-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.92);
+    width: min(480px, 92vw);
+    padding: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.28s cubic-bezier(0.34, 1.2, 0.64, 1);
+    z-index: 30;
+  }
+
+  #scan-modal.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  #scan-modal .panel {
+    padding: 22px 24px 20px;
+  }
+
+  #scan-modal h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    color: #ff9a4a;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+
+  #scan-type {
+    font-size: 12px;
+    color: #a08070;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  #scan-content {
+    font-size: 14px;
+    line-height: 1.55;
+    color: #e0d0c0;
+    margin-bottom: 16px;
+  }
+
+  #scan-content .fact {
+    background: rgba(40,22,12,0.6);
+    border-left: 3px solid #e07030;
+    padding: 10px 12px;
+    margin: 12px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 13px;
+  }
+
+  #scan-content .note {
+    font-size: 12px;
+    color: #908070;
+    font-style: italic;
+    margin-top: 10px;
+  }
+
+  #scan-close {
+    display: block;
+    width: 100%;
+    padding: 11px;
+    background: linear-gradient(135deg, #c06028, #e07830);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: filter 0.2s;
+  }
+
+  #scan-close:hover { filter: brightness(1.12); }
+
+  /* Crosshair / scan prompt */
+  #scan-prompt {
+    position: absolute;
+    top: 58%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 8px;
+    background: rgba(20,10,5,0.75);
+    border: 1px solid rgba(255,150,60,0.4);
+    border-radius: 20px;
+    font-size: 13px;
+    color: #ffb070;
+    opacity: 0;
+    transition: opacity 0.25s;
+    pointer-events: none;
+    letter-spacing: 0.5px;
+  }
+
+  #scan-prompt.show { opacity: 1; }
+
+  /* Title screen */
+  #title-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: radial-gradient(ellipse at 50% 30%, #2a1408 0%, #0a0402 70%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.8s ease, visibility 0.8s;
+  }
+
+  #title-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  #title-screen h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(28px, 7vw, 48px);
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: #ff9a4a;
+    text-shadow: 0 0 40px rgba(255,120,40,0.4);
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  #title-screen .subtitle {
+    font-size: 15px;
+    color: #c09070;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 40px;
+  }
+
+  #start-btn {
+    padding: 14px 48px;
+    background: linear-gradient(135deg, #c05020, #e07030);
+    border: none;
+    border-radius: 30px;
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    cursor: pointer;
+    box-shadow: 0 6px 30px rgba(200,80,20,0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  #start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 40px rgba(200,80,20,0.55);
+  }
+
+  #title-desc {
+    max-width: 480px;
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #a08070;
+    margin-top: 32px;
+    padding: 0 20px;
+  }
+
+  /* Toast notifications */
+  #toast {
+    position: absolute;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    padding: 12px 24px;
+    background: rgba(20,10,5,0.9);
+    border: 1px solid rgba(255,150,60,0.45);
+    border-radius: 8px;
+    font-size: 14px;
+    color: #ffc080;
+    opacity: 0;
+    transition: all 0.35s;
+    pointer-events: none;
+    z-index: 40;
+    text-align: center;
+    max-width: 90vw;
+  }
+
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Loading */
+  #loading {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: #0a0402;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', sans-serif;
+    color: #e07030;
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+
+  #loading.hidden { display: none; }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(224,112,48,0.2);
+    border-top-color: #e07030;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 20px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Mobile controls */
+  #mobile-controls {
+    display: none;
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    gap: 8px;
+  }
+
+  @media (max-width: 768px) {
+    #controls-hint { display: none; }
+    #mobile-controls {
+      display: flex;
+      flex-direction: column;
+    }
+    #minimap-wrap {
+      width: 120px;
+      height: 120px;
+      bottom: 16px;
+      right: 12px;
+    }
+    #mission-panel { max-width: 55%; }
+  }
+
+  .mob-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(30,15,8,0.75);
+    border: 1px solid rgba(200,100,40,0.4);
+    color: #ffb070;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+#surface-actions{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:7px;flex-wrap:wrap;justify-content:center;pointer-events:auto;max-width:45vw}#surface-actions button,#surface-actions a,#touch-drive button{background:#201209ee;border:1px solid #bf7748;color:#ffe5cb;border-radius:10px;padding:12px;font:inherit;text-decoration:none;min-height:44px;touch-action:none}#touch-drive{position:fixed;left:16px;bottom:120px;display:grid;grid-template-columns:repeat(3,44px);gap:5px;pointer-events:auto}#touch-drive button{padding:8px}#surface-result{position:fixed;inset:0;z-index:40;background:#140a05ed;display:grid;place-content:center;text-align:center;padding:24px;gap:18px}#surface-result[hidden]{display:none}#surface-result button,#surface-result a{color:#fff;background:#663d21;border:1px solid #edaa70;padding:14px;border-radius:10px;font:inherit}#surface-result p{max-width:650px;line-height:1.6}#title-desc a{color:#ffc18f}#scan-modal .panel{max-height:80vh;overflow:auto}#loading a{color:#ffd09b}
+@media(max-width:650px){#top-bar{gap:8px;top:8px;left:8px;right:8px}#mission-panel{max-width:68%;padding:10px}#status-panel{padding:8px;min-width:85px}#controls-hint{display:none}#minimap-wrap{bottom:160px;right:8px;transform:scale(.7);transform-origin:bottom right}#surface-actions{bottom:12px;max-width:95vw;width:95vw}#touch-drive{bottom:145px;left:8px}#title-screen h1{font-size:clamp(22px,7vw,48px)}}
+</style>
+<link rel="stylesheet" href="assets/eyes-theme.css"></head>
+<body data-view="surface">
+
+<div id="loading">
+  <div class="spinner"></div>
+  ЗАГРУЗКА МАРСИАНСКОЙ ПОВЕРХНОСТИ...
+</div>
+
+<div id="title-screen">
+  <h1>CURIOSITY · ПУТЬ К МАРСУ</h1>
+  <div class="subtitle">Глава 7 · Архив исследований · 2012–2013</div>
+  <button id="start-btn">ВЫЕХАТЬ НА ПОВЕРХНОСТЬ</button>
+  <p id="title-desc">
+    Аркадный маршрут на 2–3 минуты: объезжайте камни и кратеры; песчаные дюны замедляют движение. Успейте изучить три реальных результата Curiosity: Hottah, John Klein и RAD. Цветные маркеры открывают архивные карточки NASA. Рельеф и расстояния схематические; в действительности эти исследования заняли месяцы. Соберите все три записи за 180 секунд игрового движения, затем настройте передачу на Землю. Чтение карточек останавливает таймер.
+  </p>
+</div>
+
+<div id="canvas-container"></div>
+
+<div id="hud" style="display:none;">
+  <div id="top-bar">
+    <div id="mission-panel" class="panel">
+      <h2>Текущая миссия</h2>
+      <div id="mission-title">Инициализация...</div>
+      <div id="mission-desc"></div>
+      <div id="mission-progress"><div id="mission-progress-bar"></div></div>
+    </div>
+    <div id="status-panel" class="panel"><div id="course-status" role="status">Маршрут · 3:00</div>
+      <div class="stat-row">
+        <span class="stat-label">Ресурс игры</span>
+        <div class="stat-bar-bg"><div class="stat-bar" id="energy-bar" style="width:100%"></div></div>
+        <span class="stat-value" id="energy-val">100%</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Архив</span>
+        <div class="stat-bar-bg"><div class="stat-bar" id="integrity-bar" style="width:100%"></div></div>
+        <span class="stat-value" id="integrity-val">100%</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="scan-prompt">Нажмите E или «Изучить запись»</div>
+
+  <div id="controls-hint" class="panel">
+    <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> — движение<br>
+    <kbd>E</kbd> — сканировать объект<br>
+    <kbd>C</kbd> — смена камеры<br>
+    <kbd>Пробел</kbd> — торможение
+  </div>
+
+  <div id="minimap-wrap" class="panel">
+    <canvas id="minimap" width="160" height="160"></canvas>
+    <div id="minimap-label">КАРТА</div>
+  </div>
+
+  <div id="scan-modal">
+    <div class="panel">
+      <h3 id="scan-name">Объект</h3>
+      <div id="scan-type">Тип</div>
+      <div id="scan-content"></div>
+      <button id="scan-close">ПРОДОЛЖИТЬ ИССЛЕДОВАНИЕ</button>
+    </div>
+  </div>
+
+  <div id="toast"></div><div id="touch-drive" aria-label="Управление марсоходом"><span></span><button data-key="ArrowUp" aria-label="Вперёд">↑</button><span></span><button data-key="ArrowLeft" aria-label="Влево">←</button><button data-key="ArrowDown" aria-label="Назад">↓</button><button data-key="ArrowRight" aria-label="Вправо">→</button></div><div id="surface-actions"><button id="scan-button">Изучить запись</button><button id="camera-button">Камера</button><button id="report-button" disabled>К передаче данных</button><button id="retry-surface">Повторить</button><a href="index.html">К запуску</a></div>
+</div>
+
+<div id="surface-result" hidden><h2 id="surface-result-title"></h2><p id="surface-result-text"></p><button id="surface-again">Повторить исследование</button><a href="index.html">Новая экспедиция</a></div><div class="model-credit" id="model-credit">Загрузка модели NASA / VTAD…</div><script src="js/three.vendor.js"></script><script src="js/gltf-loader.vendor.js"></script><script src="assets/models/curiosity-data.js"></script><script src="js/nasa-models.js"></script><script src="js/science-archive.js"></script><script src="js/mars-progress.js"></script>
+
+<script src="js/rover-course.js"></script><script src="js/mars-rover.js"></script>
+</body>
+</html>
